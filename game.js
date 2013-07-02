@@ -10,7 +10,7 @@
 	
 	//ui stuff
 	function Board(){
-		this.tiles = [];
+		this.cells = [];
 		this.currentDepth = 0;
 		this.currPlayer = 1;//player 1 is always human, player 2 is always AI
 
@@ -31,7 +31,7 @@
 					}
 
 					tableRow.appendChild(tableCol);
-					this.tiles[currId] = '';
+					this.cells[currId] = '';
 				}
 
 				table.appendChild(tableRow);
@@ -40,35 +40,24 @@
 		}
 		
 		this.empty = function(){
-			for(var i = 0, maxTiles = this.tiles.length; i < maxTiles; i++){
-				this.tiles[i] = '';
+			for(var i = 0, maxCells = this.cells.length; i < maxCells; i++){
+				this.cells[i] = '';
 			}
 
-			var tableTiles = document.getElementsByTagName('td');
-			for(var i = 0, maxTableTiles = tableTiles.length; i < maxTableTiles; i++){
-				tableTiles[i].innerHTML = '';
-				tableTiles[i].style.background = '#fff';
-				tableTiles[i].style.color = '#000';
+			var tableCells = document.getElementsByTagName('td');
+			for(var i = 0, maxTableCells = tableCells.length; i < maxTableCells; i++){
+				tableCells[i].innerHTML = '';
+				tableCells[i].style.background = '#fff';
+				tableCells[i].style.color = '#000';
 			}
 			this.currPlayer = 1;
 			this.currentDepth = 0;
-		}
-
-		this.getPossibleMoves = function(){
-			var possibleMoves = [];
-			for(var i = 1, maxTiles = this.tiles.length; i <= maxTiles; i++){
-				if(this.tiles[i] === '')
-					possibleMoves.push(i);
-			}
-			return (possibleMoves.length === 0)? false: possibleMoves;
-		}
+		}	
 
 		this.checkWin = function(){
-
 		}
 
 		this.evaluate = function(){
-
 		}
 	}
 
@@ -80,11 +69,12 @@
 	var winningCombinations = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 4, 7], [2, 5, 8], [3, 6, 9], [1, 5, 9], [3, 5, 7]];
 	var endDepth = 9;
 
-	function move(tile){
-		if(tile.innerHTML === ''){
-			tile.innerHTML = players[board.currPlayer];
-			board.tiles[tile.id] = board.currPlayer;
-			var isThereWinner = checkForWinner(board);
+	function move(cell){
+		console.log(cell);
+		if(cell.innerHTML === ''){
+			cell.innerHTML = players[board.currPlayer];
+			board.cells[cell.id] = board.currPlayer;
+			var isThereWinner = checkForWinner(board.cells, board.currPlayer);
 			if(!isThereWinner){
 				board.currentDepth++;
 				if(board.currentDepth === endDepth){//if there is no winner but board has already reached end state (in other words, the game is a draw);
@@ -94,9 +84,10 @@
 				}else{
 					board.currPlayer = (board.currPlayer === 1)?2:1;
 					if(board.currPlayer === 2){
-						var bestMove = miniMax(board, board.currPlayer, board.currDepth, endDepth);
-						var bestMoveTile = document.getElementById(bestMove);
-						move(bestMoveTile);
+						var bestMove = miniMax(board.cells, board.currPlayer, board.currDepth, endDepth);
+						var bestMoveCell = document.getElementById(bestMove);
+						console.log(bestMove, bestMoveCell);
+						move(bestMoveCell);
 					}
 				}
 			}else{
@@ -114,10 +105,11 @@
 	//AI stuff
 	//variables needed for determining the best possible move
 
-	function miniMax(boardObj, requiredDepth){
-		var currentTiles = boardObj.tiles;
-		var possibleMoves = boardObj.getPossibleMoves();
-		var bestMove = possibleMoves[Math.floor(possibleMoves.length * Math.random())];//currently just randomly returning a value from possible move array
+	function miniMax(boardCells, boardPlayer, boardDepth, endDepth){
+		var possibleMoves = getPossibleMoves(boardCells);
+		var bestMove = possibleMoves[Math.floor(possibleMoves.length * Math.random())];
+
+		
 		return bestMove;
 	}
 	
@@ -125,23 +117,32 @@
 
 
 	//helper functions
-	function checkForWinner(boardObj){
-		var playerTiles = getPlayerTiles(boardObj);
-		//check if current player's tiles matches winning combinations
-		var isWinningTiles = tileIntersect(playerTiles);
-		if(isWinningTiles)
-			return isWinningTiles;	
+	function getPossibleMoves(boardCells){
+			var possibleMoves = [];
+			for(var i = 1, maxCells = boardCells.length; i <= maxCells; i++){
+				if(boardCells[i] === '')
+					possibleMoves.push(i);
+			}
+			return (possibleMoves.length === 0)? false: possibleMoves;
+		}
+
+	function checkForWinner(boardCells, boardPlayer){
+		var playerCells = getPlayerCells(boardCells, boardPlayer);
+		//check if current player's cells matches winning combinations
+		var isWinningCells = cellIntersect(playerCells);
+		if(isWinningCells)
+			return isWinningCells;	
 		return false;
 	}
 	
-	function getPlayerTiles(boardObj){
-		var playerTiles = [];
-		for(tileId in boardObj.tiles){
-			if(boardObj.tiles[tileId] === boardObj.currPlayer){
-				playerTiles.push(tileId);
+	function getPlayerCells(boardCells, boardPlayer){
+		var playerCells = [];
+		for(cellId in boardCells){
+			if(boardCells[cellId] === boardPlayer){
+				playerCells.push(cellId);
 			}
 		}
-		return playerTiles;
+		return playerCells;
 	}
 
 	function arrayIntersect(arrA, arrB){
@@ -157,11 +158,11 @@
 		return arrIntersect.length === 0? false: arrIntersect;
 	}
 
-	function tileIntersect(playerTiles){
+	function cellIntersect(playerCells){
 		for(var i = 0, maxCombi = winningCombinations.length; i < maxCombi; i++){
-			var tileResult = arrayIntersect(playerTiles, winningCombinations[i]);
-			if(tileResult !== false && tileResult.length === 3)
-				return tileResult;
+			var cellResult = arrayIntersect(playerCells, winningCombinations[i]);
+			if(cellResult !== false && cellResult.length === 3)
+				return cellResult;
 		}
 
 		return false;
