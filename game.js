@@ -10,8 +10,11 @@
 	
 	//ui stuff
 	function Board(){
-		var boardTiles = {};
-		var draw = function(){
+		this.tiles = [];
+		this.currentDepth = 0;
+		this.currPlayer = 1;//player 1 is always human, player 2 is always AI
+
+		this.draw = function(){
 			var table = document.createElement('table');
 			var tableObj = {rows: 3, cols: 3};
 			var currId = 1;
@@ -25,40 +28,48 @@
 	
 					tableCol.onclick = function(){
 						move(this);
-					}		
-	
+					}
+
 					tableRow.appendChild(tableCol);
-				
-					boardTiles[currId] = '';
+					this.tiles[currId] = '';
 				}
-	
+
 				table.appendChild(tableRow);
 			}
 			document.body.appendChild(table);
 		}
 		
-		var empty = function(){
-			for(tiles in boardTiles){
-				boardTiles[tiles] = '';
+		this.empty = function(){
+			for(var i = 0, maxTiles = this.tiles.length; i < maxTiles; i++){
+				this.tiles[i] = '';
 			}
+
 			var tableTiles = document.getElementsByTagName('td');
-			for(var i = 0, maxTiles = tableTiles.length; i < maxTiles; i++){
+			for(var i = 0, maxTableTiles = tableTiles.length; i < maxTableTiles; i++){
 				tableTiles[i].innerHTML = '';
 				tableTiles[i].style.background = '#fff';
 				tableTiles[i].style.color = '#000';
 			}
-			currPlayer = 1;
+			this.currPlayer = 1;
+			this.currentDepth = 0;
 		}
 
-		return {
-			tiles: boardTiles,
-			draw: draw,
-			empty: empty
+		this.getPossibleMoves = function(){
+			var possibleMoves = [];
+			for(var i = 1, maxTiles = this.tiles.length; i <= maxTiles; i++){
+				if(this.tiles[i] === '')
+					possibleMoves.push(i);
+			}
+			return (possibleMoves.length === 0)? false: possibleMoves;
 		}
-	}
 
-	function miniMax(){
-		
+		this.checkWin = function(){
+
+		}
+
+		this.evaluate = function(){
+
+		}
 	}
 
 	var board = new Board();
@@ -66,30 +77,56 @@
 
 	//game logic, controls functions and stuff
 	var players = {1: 'X', 2:'O'};
-	var currPlayer = 1;
 	var winningCombinations = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 4, 7], [2, 5, 8], [3, 6, 9], [1, 5, 9], [3, 5, 7]];
+	var endDepth = 9;
 
-	function move(tile){		
+	function move(tile){
 		if(tile.innerHTML === ''){
-			tile.innerHTML = players[currPlayer];
-			board.tiles[tile.id] = currPlayer;
-			var isThereWinner = checkForWinner(currPlayer);
-			if(isThereWinner === false){
-				currPlayer = (currPlayer === 1)?2:1;
+			tile.innerHTML = players[board.currPlayer];
+			board.tiles[tile.id] = board.currPlayer;
+			var isThereWinner = checkForWinner(board);
+			if(!isThereWinner){
+				board.currentDepth++;
+				if(board.currentDepth === endDepth){//if there is no winner but board has already reached end state (in other words, the game is a draw);
+					var newGame = confirm('Game is draw!\nStart a new game?');
+					if(newGame)
+						board.empty();
+				}else{
+					board.currPlayer = (board.currPlayer === 1)?2:1;
+					if(board.currPlayer === 2){
+						var bestMove = miniMax(board, board.currPlayer, board.currDepth, endDepth);
+						var bestMoveTile = document.getElementById(bestMove);
+						move(bestMoveTile);
+					}
+				}
 			}else{
 				for(var i = 0; i < 3; i++){
 					document.getElementById(isThereWinner[i]).style.background = '#f00';
 					document.getElementById(isThereWinner[i]).style.color = '#fff';
 				}
-				var newGame = confirm('Player ' + currPlayer + ' won!\nStart a new Game?');
+				var newGame = confirm((board.currPlayer === 1?'You':'Computer') + ' won!\nStart a new Game?');
 				if(newGame)
 					board.empty();	
 			}
 		}
 	}
 
-	function checkForWinner(player){
-		var playerTiles = getPlayerTiles(player);
+	//AI stuff
+	//variables needed for determining the best possible move
+
+	function miniMax(boardObj, requiredDepth){
+		var currentTiles = boardObj.tiles;
+		var possibleMoves = boardObj.getPossibleMoves();
+		var bestMove = possibleMoves[Math.floor(possibleMoves.length * Math.random())];//currently just randomly returning a value from possible move array
+		return bestMove;
+	}
+	
+	
+
+
+	//helper functions
+	function checkForWinner(boardObj){
+		var playerTiles = getPlayerTiles(boardObj);
 		//check if current player's tiles matches winning combinations
 		var isWinningTiles = tileIntersect(playerTiles);
 		if(isWinningTiles)
@@ -97,20 +134,16 @@
 		return false;
 	}
 	
-	function getPlayerTiles(playerId){
+	function getPlayerTiles(boardObj){
 		var playerTiles = [];
-		for(tileId in board.tiles){
-			if(board.tiles[tileId] === playerId){
+		for(tileId in boardObj.tiles){
+			if(boardObj.tiles[tileId] === boardObj.currPlayer){
 				playerTiles.push(tileId);
 			}
 		}
 		return playerTiles;
 	}
 
-	//AI stuff
-
-
-	//helper functions
 	function arrayIntersect(arrA, arrB){
 		var arrIntersect = [];
 		
@@ -120,6 +153,7 @@
 					arrIntersect.push(arrB[j]);
 			}
 		}
+
 		return arrIntersect.length === 0? false: arrIntersect;
 	}
 
