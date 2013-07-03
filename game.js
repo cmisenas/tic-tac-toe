@@ -70,11 +70,12 @@
 	var endDepth = 9;
 
 	function move(cell){
+
 		if(cell.innerHTML === ''){
 			cell.innerHTML = players[board.currPlayer];
 			board.cells[cell.id] = board.currPlayer;
 			var isThereWinner = checkForWinner(board.cells, board.currPlayer);
-			console.log(isThereWinner);
+
 			if(!isThereWinner){
 				board.currDepth++;
 				if(board.currDepth === endDepth){//if there is no winner but board has already reached end state (in other words, the game is a draw);
@@ -84,7 +85,11 @@
 				}else{
 					board.currPlayer = (board.currPlayer === 1)?2:1;
 					if(board.currPlayer === 2){
-						var bestMove = miniMax(board.cells, board.currPlayer, board.currDepth);
+						var boardCells = board.cells.slice(0);//just clone the cells board
+						var boardCurrPlayer = board.currPlayer;
+						var boardCurrDepth = board.currDepth;
+
+						var bestMove = miniMax(boardCells, boardCurrPlayer, boardCurrDepth);
 						var bestMoveCell = document.getElementById(bestMove);
 						move(bestMoveCell);
 					}
@@ -108,7 +113,6 @@
 	function miniMax(boardCells, boardPlayer, boardDepth){
 		var isThereWinner = checkForWinner(boardCells, boardPlayer);
 		var bestMove;
-		console.log(isThereWinner, boardDepth, ':D');
 		if(boardDepth === endDepth || isThereWinner){//check if you've reached a leaf node
 			//ending value for leaf nodes
 			if(isThereWinner){
@@ -135,13 +139,10 @@
 					valueToCompare = valueTemp;
 					bestMove = possibleMoves[i];
 				}
-				console.log(valueTemp, valueToCompare);
 			}
 			
-			if(boardDepth === endDepth){
-				console.log('foo');
+			if(boardDepth === endDepth)
 				return bestMove;
-			}
 
 			return valueToCompare;
 		}
