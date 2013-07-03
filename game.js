@@ -11,7 +11,7 @@
 	//ui stuff
 	function Board(){
 		this.cells = [];
-		this.currentDepth = 0;
+		this.currDepth = 0;
 		this.currPlayer = 1;//player 1 is always human, player 2 is always AI
 
 		this.draw = function(){
@@ -51,7 +51,7 @@
 				tableCells[i].style.color = '#000';
 			}
 			this.currPlayer = 1;
-			this.currentDepth = 0;
+			this.currDepth = 0;
 		}	
 
 		this.checkWin = function(){
@@ -70,34 +70,34 @@
 	var endDepth = 9;
 
 	function move(cell){
-		console.log(cell);
 		if(cell.innerHTML === ''){
 			cell.innerHTML = players[board.currPlayer];
 			board.cells[cell.id] = board.currPlayer;
 			var isThereWinner = checkForWinner(board.cells, board.currPlayer);
+			console.log(isThereWinner);
 			if(!isThereWinner){
-				board.currentDepth++;
-				if(board.currentDepth === endDepth){//if there is no winner but board has already reached end state (in other words, the game is a draw);
+				board.currDepth++;
+				if(board.currDepth === endDepth){//if there is no winner but board has already reached end state (in other words, the game is a draw);
 					var newGame = confirm('Game is draw!\nStart a new game?');
 					if(newGame)
 						board.empty();
 				}else{
 					board.currPlayer = (board.currPlayer === 1)?2:1;
 					if(board.currPlayer === 2){
-						var bestMove = miniMax(board.cells, board.currPlayer, board.currDepth, endDepth);
+						var bestMove = miniMax(board.cells, board.currPlayer, board.currDepth);
 						var bestMoveCell = document.getElementById(bestMove);
-						console.log(bestMove, bestMoveCell);
 						move(bestMoveCell);
 					}
 				}
 			}else{
+				var winner = board.currPlayer;
 				for(var i = 0; i < 3; i++){
 					document.getElementById(isThereWinner[i]).style.background = '#f00';
 					document.getElementById(isThereWinner[i]).style.color = '#fff';
 				}
-				var newGame = confirm((board.currPlayer === 1?'You':'Computer') + ' won!\nStart a new Game?');
+				var newGame = confirm((winner === 1?'You':'Computer') + ' won!\nStart a new Game?');
 				if(newGame)
-					board.empty();	
+					board.empty();
 			}
 		}
 	}
@@ -105,12 +105,46 @@
 	//AI stuff
 	//variables needed for determining the best possible move
 
-	function miniMax(boardCells, boardPlayer, boardDepth, endDepth){
-		var possibleMoves = getPossibleMoves(boardCells);
-		var bestMove = possibleMoves[Math.floor(possibleMoves.length * Math.random())];
+	function miniMax(boardCells, boardPlayer, boardDepth){
+		var isThereWinner = checkForWinner(boardCells, boardPlayer);
+		var bestMove;
+		console.log(isThereWinner, boardDepth, ':D');
+		if(boardDepth === endDepth || isThereWinner){//check if you've reached a leaf node
+			//ending value for leaf nodes
+			if(isThereWinner){
+				return (boardPlayer === 1)? -1: 1;
+			}else{//draw
+				return 0;
+			}
+		}else{
+			//get the value to compare depending on the current depth player
+			var valueToCompare = (boardPlayer === 1)? -2: 2;
+			//get all possible moves on the current board
+			var possibleMoves = getPossibleMoves(boardCells);
+			//iterate through possibleMoves
+			for(var i = 0, maxMoves = possibleMoves.length; i < maxMoves; i++){
+				var movedBoard = boardCells;
+				movedBoard[possibleMoves[i]] = boardPlayer;
+				var nextPlayer = (boardPlayer === 1)? 2: 1;
+				//recursively call minimax until you find leaf value
+				var valueTemp = miniMax(movedBoard, nextPlayer, boardDepth++);
+				if(boardPlayer === 1 && valueTemp > valueToCompare){
+					valueToCompare = valueTemp;
+					bestMove = possibleMoves[i];
+				}else if(boardPlayer === 2 && valueTemp < valueToCompare){
+					valueToCompare = valueTemp;
+					bestMove = possibleMoves[i];
+				}
+				console.log(valueTemp, valueToCompare);
+			}
+			
+			if(boardDepth === endDepth){
+				console.log('foo');
+				return bestMove;
+			}
 
-		
-		return bestMove;
+			return valueToCompare;
+		}
 	}
 	
 	
