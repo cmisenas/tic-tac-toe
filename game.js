@@ -91,7 +91,6 @@
 
 						var bestMove = miniMax(boardCells, boardCurrPlayer, boardCurrDepth);
 						var bestMoveCell = document.getElementById(bestMove);
-						move(bestMoveCell);
 					}
 				}
 			}else{
@@ -107,17 +106,15 @@
 		}
 	}
 
-	//AI stuff
-	//variables needed for determining the best possible move
-
+	//miniMax algorithm
 	function miniMax(boardCells, boardPlayer, boardDepth){
 		var isThereWinner = checkForWinner(boardCells, boardPlayer);
 		var bestMove;
 		if(boardDepth === endDepth || isThereWinner){//check if you've reached a leaf node
 			//ending value for leaf nodes
 			if(isThereWinner){
-				return (boardPlayer === 1)? -1: 1;
-			}else{//draw
+				return (boardPlayer === 2)? -1: 1; //player 1 is human, player 2 is AI, if there is a winner already and current player is 1, it is a losing state, otherwise, a winning state
+			}else{//game is a draw
 				return 0;
 			}
 		}else{
@@ -134,15 +131,19 @@
 				var valueTemp = miniMax(movedBoard, nextPlayer, boardDepth++);
 				if(boardPlayer === 1 && valueTemp > valueToCompare){
 					valueToCompare = valueTemp;
-					bestMove = possibleMoves[i];
+					if(boardDepth === board.currDepth + 1)
+						bestMove = possibleMoves[i];
 				}else if(boardPlayer === 2 && valueTemp < valueToCompare){
 					valueToCompare = valueTemp;
-					bestMove = possibleMoves[i];
+					if(boardDepth === board.currDepth + 1)
+						bestMove = possibleMoves[i];
 				}
+				console.log(boardPlayer, valueTemp, valueToCompare);
 			}
 			
-			if(boardDepth === endDepth)
-				return bestMove;
+			console.log(boardDepth, board.currDepth, bestMove);
+			if(boardDepth === endDepth)//this is wrong, returns the first board that reaches the end depth FIX THIS!!!
+				return bestMove;			
 
 			return valueToCompare;
 		}
@@ -169,7 +170,8 @@
 			return isWinningCells;	
 		return false;
 	}
-	
+
+	//for getting the cells in the board that the player has played
 	function getPlayerCells(boardCells, boardPlayer){
 		var playerCells = [];
 		for(cellId in boardCells){
@@ -179,7 +181,8 @@
 		}
 		return playerCells;
 	}
-
+	
+	//intersecting 2 arrays between their similarities
 	function arrayIntersect(arrA, arrB){
 		var arrIntersect = [];
 		
@@ -192,7 +195,9 @@
 
 		return arrIntersect.length === 0? false: arrIntersect;
 	}
-
+	
+	//intersects a player's cells and the winning combinations, 
+	//if there are 3 similarly intersected, player has won so return the winning player's cells, otherwise false
 	function cellIntersect(playerCells){
 		for(var i = 0, maxCombi = winningCombinations.length; i < maxCombi; i++){
 			var cellResult = arrayIntersect(playerCells, winningCombinations[i]);
