@@ -87,7 +87,7 @@
 					if(board.currPlayer === 2){
 						var boardCells = board.cells.slice(0);//just clone the cells board
 						var boardCurrPlayer = board.currPlayer;
-						var boardCurrDepth = board.currDepth;
+						var boardCurrDepth = board.currDepth + 1;
 
 						var bestMove = miniMax(boardCells, boardCurrPlayer, boardCurrDepth);
 						var bestMoveCell = document.getElementById(bestMove);
@@ -129,7 +129,7 @@
 				movedBoard[possibleMoves[i]] = boardPlayer;
 				var nextPlayer = (boardPlayer === 1)? 2: 1;
 				//recursively call minimax until you find leaf value
-				var valueTemp = miniMax(movedBoard, nextPlayer, boardDepth++);
+				var valueTemp = miniMax(movedBoard, nextPlayer, boardDepth + 1);
 				if(boardPlayer === 1 && valueTemp > valueToCompare){
 					valueToCompare = valueTemp;
           bestMove = possibleMoves[i];
@@ -138,8 +138,7 @@
           bestMove = possibleMoves[i];
 				}
 			}
-			
-			if(boardDepth === endDepth)//this is wrong, returns the first board that reaches the end depth FIX THIS!!!
+			if(boardDepth === board.currDepth + 1)//this is wrong, returns the first board that reaches the end depth FIX THIS!!!
 				return bestMove;			
 
 			return valueToCompare;
