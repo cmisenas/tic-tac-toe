@@ -91,6 +91,7 @@
 
 						var bestMove = miniMax(boardCells, boardCurrPlayer, boardCurrDepth);
 						var bestMoveCell = document.getElementById(bestMove);
+            move(bestMoveCell);
 					}
 				}
 			}else{
@@ -113,7 +114,7 @@
 		if(boardDepth === endDepth || isThereWinner){//check if you've reached a leaf node
 			//ending value for leaf nodes
 			if(isThereWinner){
-				return (boardPlayer === 2)? -1: 1; //player 1 is human, player 2 is AI, if there is a winner already and current player is 1, it is a losing state, otherwise, a winning state
+				return (boardPlayer === 1)? -1: 1; //player 1 is human, player 2 is AI, if there is a winner already and current player is 1, it is a losing state, otherwise, a winning state
 			}else{//game is a draw
 				return 0;
 			}
@@ -124,24 +125,20 @@
 			var possibleMoves = getPossibleMoves(boardCells);
 			//iterate through possibleMoves
 			for(var i = 0, maxMoves = possibleMoves.length; i < maxMoves; i++){
-				var movedBoard = boardCells;
+				var movedBoard = boardCells.slice(0);
 				movedBoard[possibleMoves[i]] = boardPlayer;
 				var nextPlayer = (boardPlayer === 1)? 2: 1;
 				//recursively call minimax until you find leaf value
 				var valueTemp = miniMax(movedBoard, nextPlayer, boardDepth++);
 				if(boardPlayer === 1 && valueTemp > valueToCompare){
 					valueToCompare = valueTemp;
-					if(boardDepth === board.currDepth + 1)
-						bestMove = possibleMoves[i];
+          bestMove = possibleMoves[i];
 				}else if(boardPlayer === 2 && valueTemp < valueToCompare){
 					valueToCompare = valueTemp;
-					if(boardDepth === board.currDepth + 1)
-						bestMove = possibleMoves[i];
+          bestMove = possibleMoves[i];
 				}
-				console.log(boardPlayer, valueTemp, valueToCompare);
 			}
 			
-			console.log(boardDepth, board.currDepth, bestMove);
 			if(boardDepth === endDepth)//this is wrong, returns the first board that reaches the end depth FIX THIS!!!
 				return bestMove;			
 
