@@ -54,11 +54,6 @@
 			this.currDepth = 0;
 		}	
 
-		this.checkWin = function(){
-		}
-
-		this.evaluate = function(){
-		}
 	}
 
 	var board = new Board();
