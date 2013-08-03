@@ -120,7 +120,7 @@
 			}
 		}else{
 			//get the value to compare depending on the current depth player
-			var valueToCompare = (boardPlayer === 1)? -2: 2;
+			var valueToCompare = (boardPlayer === 1)? 2: -2;
 			//get all possible moves on the current board
 			var possibleMoves = getPossibleMoves(boardCells);
 			//iterate through possibleMoves
@@ -130,10 +130,10 @@
 				var nextPlayer = (boardPlayer === 1)? 2: 1;
 				//recursively call minimax until you find leaf value
 				var valueTemp = miniMax(movedBoard, nextPlayer, boardDepth + 1);
-				if(boardPlayer === 1 && valueTemp > valueToCompare){
+				if(boardPlayer === 1 && valueTemp < valueToCompare){
 					valueToCompare = valueTemp;
           bestMove = possibleMoves[i];
-				}else if(boardPlayer === 2 && valueTemp < valueToCompare){
+				}else if(boardPlayer === 2 && valueTemp > valueToCompare){
 					valueToCompare = valueTemp;
           bestMove = possibleMoves[i];
 				}
