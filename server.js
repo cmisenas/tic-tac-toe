@@ -2,12 +2,12 @@
 	var http = require('http'),
 			fs = require('fs'),
 			io = require('socket.io'),
-			url = require('url');
-	
-	var socket;
+			url = require('url'),
+      socket,
+      PORT = 80;
 
-	var gamePage = fs.readFileSync(__dirname + '/index.html');
-	var gameJs = fs.readFileSync(__dirname + '/game.js');
+	var gamePage = fs.readFileSync(__dirname + '/index.html'),
+      gameJs = fs.readFileSync(__dirname + '/game.js');
 
 	var server = http.createServer(function(req, res){
 		var pathname = url.parse(req.url).pathname;
@@ -23,8 +23,8 @@
 		}
 	});
 
-	var app = server.listen(8000); 
-	var players;
+	var app = server.listen(PORT),
+      players;
 
 	function init(){
 		players = [];
