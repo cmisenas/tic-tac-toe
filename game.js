@@ -3,7 +3,7 @@
 
 	//network stuff
 	function init(){
-		socket = io.connect(window.location.hostname, {port: 8000, transports: ["websocket"]});
+		socket = io.connect(window.location.hostname, {port: 80, transports: ["websocket"]});
 	}
 
 	init();
