@@ -30,8 +30,8 @@
 		players = [];
 		socket = io.listen(app);
 		socket.configure(function(){
-			socket.set('transports', ['websocket']);
-			socket.set('log level', 2);
+			socket.set('transports', ['xhr-polling']);
+      socket.set('polling duration', 10);
 		});
 
 		setEventHandlers();

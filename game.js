@@ -3,7 +3,7 @@
 
 	//network stuff
 	function init(){
-		socket = io.connect(window.location.hostname, {port: 80, transports: ["websocket"]});
+		socket = io.connect(window.location.hostname, {port: 80, transports: ["xhr-polling"]});
 	}
 
 	init();
